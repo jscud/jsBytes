@@ -1,0 +1,24 @@
+<html>
+  <body>
+    <script src="jsBytesTest.js"></script>
+    <div id="results"></div>
+    <script>
+      var suite = new jsBytesTest.TestSuite();
+      suite.runTests(document.getElementById('results'));
+
+      suite = new jsBytesTest.TestSuite();
+
+      suite.addTest('should fail', function(test) {
+        test.assertTrue('false should equal true', false == true);
+        test.assertEqual('5 should equal 6', 5, 6);
+      });
+
+      suite.addTest('should pass', function(test) {
+        test.assertTrue('true should equal true', true == true);
+        test.assertEqual('5 should equal 5', 5, 5);
+      });
+
+      suite.runTests(document.getElementById('results'));
+    </script>
+  </body>
+</html>
