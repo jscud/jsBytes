@@ -9,6 +9,25 @@
     <div id="results"></div>
     <script>
       var suite = new jsTest.TestSuite();
+
+      suite.addTest('testBytesToHex', function(test) {
+        test.assertEqual('0 should generate 00.',
+            '00', jsBytes.bytesToHex([0]));
+        test.assertEqual('255 should generate FF.',
+            'FF', jsBytes.bytesToHex([255]));
+        test.assertEqual('Check multi byte array.',
+            '0116B90C', jsBytes.bytesToHex([1, 22, 185, 12]));
+      });
+
+      suite.addTest('testHexToBytes', function(test) {
+        test.assertArraysEqual('00 should generate 0.',
+            [0], jsBytes.hexToBytes('00'));
+        test.assertArraysEqual('FF should generate 255.',
+            [255], jsBytes.hexToBytes('FF'));
+        test.assertArraysEqual('Check multi byte array.',
+            [1, 22, 185, 12], jsBytes.hexToBytes('0116B90C'));
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>
