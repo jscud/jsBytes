@@ -2,7 +2,7 @@
  * @fileoverview Unit testing library.
  *
  * Usage example:
- *    suite = new jsBytesTest.TestSuite();
+ *    suite = new jsTest.TestSuite();
  *
  *    suite.addTest('should fail', function(test) {
  *      test.assertTrue('false should equal true', false == true);
@@ -26,12 +26,12 @@
 /**
  * Namespace for testing utility for jsBytes.
  */
-var jsBytesTest = {};
+var jsTest = {};
 
 /**
  * @constructor
  */
-jsBytesTest.TestCase = function(name, testFunction) {
+jsTest.TestCase = function(name, testFunction) {
   this.name = name;
   this.testFunction = testFunction;
 };
@@ -43,7 +43,7 @@ jsBytesTest.TestCase = function(name, testFunction) {
  * @param {Array} failureMessages Append a message to this array should an
  *     assert fail.
  */
-jsBytesTest.TestExecution = function(testCaseName, failureMessages) {
+jsTest.TestExecution = function(testCaseName, failureMessages) {
   this.assertsPassed = true;
   this.testCaseName_ = testCaseName;
   this.failureMessages_ = failureMessages;
@@ -55,7 +55,7 @@ jsBytesTest.TestExecution = function(testCaseName, failureMessages) {
  *     if the condition is false.
  * @param {Object} condition Report test case failure if condition is not true.
  */
-jsBytesTest.TestExecution.prototype.assertTrue = function(message, condition) {
+jsTest.TestExecution.prototype.assertTrue = function(message, condition) {
   if (!condition) {
     this.recordFailure_(message);
   }
@@ -68,13 +68,37 @@ jsBytesTest.TestExecution.prototype.assertTrue = function(message, condition) {
  * @param {Object} expected The expected value for the item.
  * @param {Object} actual The calculated value which should match expected.
  */
-jsBytesTest.TestExecution.prototype.assertEqual = function(
+jsTest.TestExecution.prototype.assertEqual = function(
     message, expected, actual) {
   this.assertTrue(message + ': expected ' + expected + ' but got ' + actual,
                   expected == actual);
 };
 
-jsBytesTest.TestExecution.prototype.recordFailure_ = function(message) {
+/**
+ * Check that the two arrays are the same size and contain equivalent items.
+ * @param {string} message Description of the expectation to show to the user
+ *     if the arrays are not equal.
+ * @param {Object} expected The expected array of values.
+ * @param {Object} actual The generated array which should match expected.
+ */
+jsTest.TestExecution.prototype.assertArraysEqual = function(
+    message, expected, actual) {
+  if (expected.length != actual.length) {
+    this.recordFailure_(message + ': expected array of length ' +
+                        expected.length + ' but got array length of ' +
+                        actual.length);
+    return;
+  }
+  for (var i = 0; i < expected.length; i++) {
+    if (expected[i] != actual[i]) {
+      this.recordFailure_(message + ': arrays differed at index ' + i +
+                          ' expected ' + expected[i] + ' but got ' + actual[i]);
+      return;
+    }
+  }
+};
+
+jsTest.TestExecution.prototype.recordFailure_ = function(message) {
   if (this.assertsPassed) {
     this.failureMessages_.push('FAILED: ' + this.testCaseName_);
   }
@@ -85,7 +109,7 @@ jsBytesTest.TestExecution.prototype.recordFailure_ = function(message) {
 /**
  * @constructor
  */
-jsBytesTest.TestSuite = function() {
+jsTest.TestSuite = function() {
   this.tests = [];
 };
 
@@ -98,22 +122,22 @@ jsBytesTest.TestSuite = function() {
  *   test.assertEquals(5, foo.calculate(2, 3), 'sum should be 5');
  * });
  */
-jsBytesTest.TestSuite.prototype.addTest = function(name, testFunction) {
-  this.tests.push(new jsBytesTest.TestCase(name, testFunction));
+jsTest.TestSuite.prototype.addTest = function(name, testFunction) {
+  this.tests.push(new jsTest.TestCase(name, testFunction));
 };
 
 /**
  * Executes all test cases and appends the results to the output node.
  * @param {Element} outputNode Node to which results should be appended.
  */
-jsBytesTest.TestSuite.prototype.runTests = function(outputNode) {
+jsTest.TestSuite.prototype.runTests = function(outputNode) {
   var passedCount = 0;
   var failureMessages = [];
   var i;
 
   // Run all test cases.
   for (i = 0; i < this.tests.length; i++) {
-    var testExecutor = new jsBytesTest.TestExecution(
+    var testExecutor = new jsTest.TestExecution(
         this.tests[i].name, failureMessages);
     this.tests[i].testFunction(testExecutor);
     if (testExecutor.assertsPassed) {
@@ -122,16 +146,16 @@ jsBytesTest.TestSuite.prototype.runTests = function(outputNode) {
   }
 
   // Report results.
-  jsBytesTest.appendMessageNode_(
+  jsTest.appendMessageNode_(
       outputNode,
       passedCount + '/' + this.tests.length + ' passed',
       passedCount != this.tests.length);
   for (i = 0; i < failureMessages.length; i++) {
-    jsBytesTest.appendMessageNode_(outputNode, failureMessages[i], true);
+    jsTest.appendMessageNode_(outputNode, failureMessages[i], true);
   }
 };
 
-jsBytesTest.appendMessageNode_ = function(container, message, failure) {
+jsTest.appendMessageNode_ = function(container, message, failure) {
   if (container) {
     var messageNode = document.createElement('div');
     messageNode.style.color = failure ? 'red' : 'green';
