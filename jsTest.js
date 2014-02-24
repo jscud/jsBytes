@@ -98,6 +98,24 @@ jsTest.TestExecution.prototype.assertArraysEqual = function(
   }
 };
 
+/**
+ * Checks that executing the given function causes an exception to be thrown.
+ * @param {string} message Description of the expectation to show to the user
+ *     if the function does not throw an exception when run.
+ * @param {Function} closure A function which is expected to throw an
+ *     exception when executed. This function is called with no arguments.
+ *     Any context needed can be provided through a closure.
+ */
+jsTest.TestExecution.prototype.assertThrows = function(message, closure) {
+  try {
+    closure();
+    // Mark failure since executing the closure did not throw an exception.
+    this.recordFailure_(message + ': exception not thrown');
+  } catch(e) {
+    return;
+  }
+};
+
 jsTest.TestExecution.prototype.recordFailure_ = function(message) {
   if (this.assertsPassed) {
     this.failureMessages_.push('FAILED: ' + this.testCaseName_);
