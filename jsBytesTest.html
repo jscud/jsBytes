@@ -28,6 +28,23 @@
             [1, 22, 185, 12], jsBytes.hexToBytes('0116B90C'));
       });
 
+      suite.addTest('testAppendByte', function(test) {
+        var bytes = [];
+        jsBytes.appendByte(bytes, 0);
+        test.assertArraysEqual('appendByte 0 should succeed.', [0], bytes);
+        jsBytes.appendByte(bytes, 255);
+        test.assertArraysEqual('appendByte 255 should succeed.',
+            [0, 255], bytes);
+        test.assertThrows('Should be unable to append -1.',
+            function() {jsBytes.appendByte(bytes, -1);});
+        test.assertArraysEqual('-1 should not have been added.',
+            [0, 255], bytes);
+        test.assertThrows('Should be unable to append 256.',
+            function() {jsBytes.appendByte(bytes, 256);});
+        test.assertArraysEqual('256 should not have been added.',
+            [0, 255], bytes);
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>
