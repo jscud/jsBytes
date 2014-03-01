@@ -88,28 +88,36 @@ jsBytes.hexToBytes = function(hexString) {
  * as well as unsigned integers.
  */
 jsBytes.int32ToBytes = function(x, opt_bigEndian) {
-  if (x != Math.floor(x)) {
+  if (x != Math.floor(x) || x < -2147483648 || x > 4294967295) {
     throw new jsBytes.Error(x + ' is not a 32 bit integer');
   }
   var bytes = [];
-  if (x >= 0 && x <= 2147483647) {
-    for (var i = 0; i < 4; i++) {
-      bytes.push(x % 256);
-      x = x >> 8;
-    }
-  } else if (x > 2147483647 && x <= 4294967295) {
-    for (var i = 0; i < 4; i++) {
-      bytes.push(x % 256);
-      x = Math.floor(x / 256);
-    }
-  } else if (x < 0 && x >= -2147483648) {
+  var current;
+  // Number type 0 is in the positive int range, 1 is larger than signed int,
+  // and 2 is negative int.
+  var numberType = x >= 0 && x <= 2147483647 ? 0 :
+      x > 2147483647 && x <= 4294967295 ? 1 : 2;
+  if (numberType == 2) {
     x = (x * -1) - 1;
-    for (var i = 0; i < 4; i++) {
-      bytes.push(255 - (x % 256));
+  }
+  for (var i = 0; i < 4; i++) {
+    if (numberType == 2) {
+      current = 255 - (x % 256);
+    } else {
+      current = x % 256;
+    }
+
+    if (opt_bigEndian) {
+      bytes.unshift(current);
+    } else {
+      bytes.push(current);
+    }
+
+    if (numberType == 1) {
+      x = Math.floor(x / 256);
+    } else {
       x = x >> 8;
     }
-  } else {
-    throw new jsBytes.Error(x + ' is not a 32 bit integer');
   }
   return bytes;
 };
