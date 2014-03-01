@@ -45,6 +45,34 @@
             [0, 255], bytes);
       });
 
+      suite.addTest('testInt32ToBytes', function(test) {
+        test.assertArraysEqual('Check 0', [0,0,0,0], jsBytes.int32ToBytes(0));
+        test.assertArraysEqual('Check 255', [255,0,0,0],
+            jsBytes.int32ToBytes(255));
+        test.assertArraysEqual('Check 256', [0,1,0,0],
+            jsBytes.int32ToBytes(256));
+        test.assertArraysEqual('Check int max', [255,255,255,127],
+            jsBytes.int32ToBytes(2147483647));
+        test.assertArraysEqual('Check unsigned int max', [255,255,255,255],
+            jsBytes.int32ToBytes(4294967295));
+        test.assertArraysEqual('Check -1', [255,255,255,255],
+            jsBytes.int32ToBytes(-1));
+        test.assertArraysEqual('Check -2', [254,255,255,255],
+            jsBytes.int32ToBytes(-2));
+        test.assertArraysEqual('Check -256', [0,255,255,255],
+            jsBytes.int32ToBytes(-256));
+        test.assertArraysEqual('Check -257', [255,254,255,255],
+            jsBytes.int32ToBytes(-257));
+        test.assertArraysEqual('Check negative int max', [0,0,0,128],
+            jsBytes.int32ToBytes(-2147483648));
+        test.assertThrows('Check beyond negative int max',
+            function() {jsBytes.int32ToBytes(-2147483649);});
+        test.assertThrows('Check beyond unsigned int max',
+            function() {jsBytes.int32ToBytes(4294967296);});
+        test.assertThrows('Check floating point input',
+            function() {jsBytes.int32ToBytes(2.02);});
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>

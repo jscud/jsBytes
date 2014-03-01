@@ -16,7 +16,7 @@ jsBytes.appendByte = function(bytes, b) {
   if (b >= 0 && b < 256) {
     bytes.push(b);
   } else {
-    throw new jsBytes.Error('Byte ' + b + ' was not between 0 and 255');
+    throw new jsBytes.Error('Byte ' + b + ' is not between 0 and 255');
   }
 };
 
@@ -82,4 +82,35 @@ jsBytes.hexToBytes = function(hexString) {
   return bytes;
 };
 
+/**
+ * Produces an array of four bytes to represent the integer value.
+ * Default output encodes ints in little endian format. Handles signed
+ * as well as unsigned integers.
+ */
+jsBytes.int32ToBytes = function(x, opt_bigEndian) {
+  if (x != Math.floor(x)) {
+    throw new jsBytes.Error(x + ' is not a 32 bit integer');
+  }
+  var bytes = [];
+  if (x >= 0 && x <= 2147483647) {
+    for (var i = 0; i < 4; i++) {
+      bytes.push(x % 256);
+      x = x >> 8;
+    }
+  } else if (x > 2147483647 && x <= 4294967295) {
+    for (var i = 0; i < 4; i++) {
+      bytes.push(x % 256);
+      x = Math.floor(x / 256);
+    }
+  } else if (x < 0 && x >= -2147483648) {
+    x = (x * -1) - 1;
+    for (var i = 0; i < 4; i++) {
+      bytes.push(255 - (x % 256));
+      x = x >> 8;
+    }
+  } else {
+    throw new jsBytes.Error(x + ' is not a 32 bit integer');
+  }
+  return bytes;
+};
 
