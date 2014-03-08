@@ -78,7 +78,7 @@
             jsBytes.int32ToBytes(255, true));
         test.assertArraysEqual('Check 256', [0,0,1,0],
             jsBytes.int32ToBytes(256, true));
-        test.assertArraysEqual('Check int max', [127, 255,255,255],
+        test.assertArraysEqual('Check int max', [127,255,255,255],
             jsBytes.int32ToBytes(2147483647, true));
         test.assertArraysEqual('Check -2', [255,255,255,254],
             jsBytes.int32ToBytes(-2, true));
@@ -90,6 +90,37 @@
             jsBytes.int32ToBytes(-2147483648, true));
       });
 
+      suite.addTest('testLittleEndianBytesToSignedInt32', function(test) {
+          test.assertEqual('Check 0', 0,
+              jsBytes.littleEndianBytesToSignedInt32([0, 0, 0, 0]));
+          test.assertEqual('Check 1', 1,
+              jsBytes.littleEndianBytesToSignedInt32([1, 0, 0, 0]));
+          test.assertEqual('Check 256', 256,
+              jsBytes.littleEndianBytesToSignedInt32([0, 1, 0, 0]));
+          test.assertEqual('Check 65,536', 65536,
+              jsBytes.littleEndianBytesToSignedInt32([0, 0, 1, 0]));
+          test.assertEqual('Check int max', 2147483647,
+              jsBytes.littleEndianBytesToSignedInt32([255,255,255,127]));
+          test.assertEqual('Check 1 with start index', 1,
+              jsBytes.littleEndianBytesToSignedInt32([255, 1, 0, 0, 0], 1));
+
+
+          test.assertThrows('Too few bytes',
+              function() {jsBytes.littleEndianBytesToSignedInt32([1,1,1]);});
+          test.assertThrows('Too few bytes with index',
+              function() {jsBytes.littleEndianBytesToSignedInt32([1,1,1,1], 1);});
+          test.assertThrows('Negative start index',
+              function() {jsBytes.littleEndianBytesToSignedInt32([1,1,1,1], -1);});
+
+          test.assertEqual('Check -2', -2,
+              jsBytes.littleEndianBytesToSignedInt32([254,255,255,255]));
+          test.assertEqual('Check -256', -256,
+              jsBytes.littleEndianBytesToSignedInt32([0,255,255,255]));
+          test.assertEqual('Check -257', -257,
+              jsBytes.littleEndianBytesToSignedInt32([255,254,255,255]));
+          test.assertEqual('Check negative int max', -2147483648,
+              jsBytes.littleEndianBytesToSignedInt32([0,0,0,128]));
+      });
 
       suite.runTests(document.getElementById('results'));
     </script>

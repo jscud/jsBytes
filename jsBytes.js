@@ -122,3 +122,19 @@ jsBytes.int32ToBytes = function(x, opt_bigEndian) {
   return bytes;
 };
 
+jsBytes.littleEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
+  var index = opt_startIndex || 0;
+  if (index < 0) {
+    throw new jsBytes.Error('Start index should not be negative');
+  }
+  if (bytes.length < index + 4) {
+    throw new jsBytes.Error('Need at least 4 bytes to convert to an integer');
+  }
+  var isNegative = bytes[index + 3] > 127;
+  var negativeShift = isNegative ? 255 : 0;
+  value = bytes[index] - negativeShift - (isNegative ? 1 : 0);
+  value += (bytes[index + 1] - negativeShift) << 8;
+  value += (bytes[index + 2] - negativeShift) << 16;
+  value += (bytes[index + 3] - negativeShift) << 24;
+  return value;
+};
