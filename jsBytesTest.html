@@ -122,6 +122,45 @@
               jsBytes.littleEndianBytesToSignedInt32([0,0,0,128]));
       });
 
+      suite.addTest('testBigEndianBytesToSignedInt32', function(test) {
+          test.assertEqual('Check 0', 0,
+              jsBytes.bigEndianBytesToSignedInt32([0, 0, 0, 0]));
+          test.assertEqual('Check 1', 1,
+              jsBytes.bigEndianBytesToSignedInt32([0, 0, 0, 1]));
+          test.assertEqual('Check 256', 256,
+              jsBytes.bigEndianBytesToSignedInt32([0, 0, 1, 0]));
+          test.assertEqual('Check 65,536', 65536,
+              jsBytes.bigEndianBytesToSignedInt32([0, 1, 0, 0]));
+          test.assertEqual('Check int max', 2147483647,
+              jsBytes.bigEndianBytesToSignedInt32([127,255,255,255]));
+          test.assertEqual('Check 1 with start index', 1,
+              jsBytes.bigEndianBytesToSignedInt32([255, 0, 0, 0, 1], 1));
+
+
+          test.assertEqual('Check -2', -2,
+              jsBytes.bigEndianBytesToSignedInt32([255,255,255,254]));
+          test.assertEqual('Check -256', -256,
+              jsBytes.bigEndianBytesToSignedInt32([255,255,255,0]));
+          test.assertEqual('Check -257', -257,
+              jsBytes.bigEndianBytesToSignedInt32([255,255,254,255]));
+          test.assertEqual('Check negative int max', -2147483648,
+              jsBytes.bigEndianBytesToSignedInt32([128,0,0,0]));
+      });
+
+      suite.addTest('testLittleEndianBytesToUnsignedInt32', function(test) {
+          test.assertEqual('Check signed int max + 1', 2147483648,
+              jsBytes.littleEndianBytesToUnsignedInt32([0,0,0,128]));
+          test.assertEqual('Check unsigned int max', 4294967295,
+              jsBytes.littleEndianBytesToUnsignedInt32([255,255,255,255]));
+      });
+
+      suite.addTest('testBigEndianBytesToUnsignedInt32', function(test) {
+          test.assertEqual('Check signed int max + 1', 2147483648,
+              jsBytes.bigEndianBytesToUnsignedInt32([128,0,0,0]));
+          test.assertEqual('Check unsigned int max', 4294967295,
+              jsBytes.bigEndianBytesToUnsignedInt32([255,255,255,255]));
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>

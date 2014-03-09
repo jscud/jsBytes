@@ -122,19 +122,53 @@ jsBytes.int32ToBytes = function(x, opt_bigEndian) {
   return bytes;
 };
 
-jsBytes.littleEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
-  var index = opt_startIndex || 0;
-  if (index < 0) {
+jsBytes.checkBytesToIntInput = function(bytes, numBytes, opt_startIndex) {
+  var startIndex = opt_startIndex || 0;
+  if (startIndex < 0) {
     throw new jsBytes.Error('Start index should not be negative');
   }
-  if (bytes.length < index + 4) {
-    throw new jsBytes.Error('Need at least 4 bytes to convert to an integer');
+  if (bytes.length < startIndex + numBytes) {
+    throw new jsBytes.Error('Need at least ' + numBytes +
+                            ' bytes to convert to an integer');
   }
-  var isNegative = bytes[index + 3] > 127;
-  var negativeShift = isNegative ? 255 : 0;
-  value = bytes[index] - negativeShift - (isNegative ? 1 : 0);
-  value += (bytes[index + 1] - negativeShift) << 8;
-  value += (bytes[index + 2] - negativeShift) << 16;
-  value += (bytes[index + 3] - negativeShift) << 24;
+  return startIndex;
+};
+
+jsBytes.littleEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
+  value = bytes[index];
+  value += bytes[index + 1] << 8;
+  value += bytes[index + 2] << 16;
+  value += bytes[index + 3] << 24;
+  return value;
+};
+
+jsBytes.littleEndianBytesToUnsignedInt32 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
+  var value = 0;
+  jsBytes.checkBytesToIntInput(bytes, 4, index);
+  for (var i = index, accum = 1; i < index + 4; i++, accum *= 256) {
+    value += bytes[i] * accum;
+  }
+  return value;
+};
+
+jsBytes.bigEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
+  jsBytes.checkBytesToIntInput(bytes, 4, index);
+  value = bytes[index + 3];
+  value += bytes[index + 2] << 8;
+  value += bytes[index + 1] << 16;
+  value += bytes[index] << 24;
+  return value;
+};
+
+jsBytes.bigEndianBytesToUnsignedInt32 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
+  var value = 0;
+  jsBytes.checkBytesToIntInput(bytes, 4, index);
+  for (var i = index + 3, accum = 1; i >= index; i--, accum *= 256) {
+    value += bytes[i] * accum;
+  }
   return value;
 };
