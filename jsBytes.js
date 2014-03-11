@@ -172,3 +172,32 @@ jsBytes.bigEndianBytesToUnsignedInt32 = function(bytes, opt_startIndex) {
   }
   return value;
 };
+
+jsBytes.stringToUtf8Bytes = function(uniString) {
+  var codePoint;
+  var bytes = [];
+  for (var i = 0; i < uniString.length; i++) {
+    codePoint = uniString.charCodeAt(i);
+    if (codePoint >= 0 && codePoint < 128) {
+      bytes.push(codePoint);
+    } else if (codePoint >= 128 && codePoint < 2048) {
+      bytes.push(192 + ((codePoint >>> 6) & 31));
+      bytes.push(128 + (codePoint & 63));
+    } else if (codePoint >= 2048 && codePoint < 65536) {
+      // Original aaaabbbb bbcccccc
+      // Becomes  1110aaaa 10bbbbbb 10cccccc
+      bytes.push(224 + ((codePoint >>> 12) & 15));
+      bytes.push(128 + ((codePoint >>> 6) & 63));
+      bytes.push(128 + (codePoint & 63));
+    } else if (codePoint >= 65536 && codePoint < 2097152) {
+      // Original 000aaabb bbbbcccc ccdddddd 
+      // Becomes  11110aaa 10bbbbbb 10cccccc 10dddddd
+      bytes.push(240 + ((codePoint >>> 18) & 7));
+      bytes.push(128 + ((codePoint >>> 12) & 63));
+      bytes.push(128 + ((codePoint >>> 6) & 63));
+      bytes.push(128 + (codePoint & 63));
+    }
+    // TODO: support higher value unicode chars.
+  }
+  return bytes;
+}
