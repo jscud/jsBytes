@@ -196,8 +196,12 @@ jsBytes.stringToUtf8Bytes = function(uniString) {
       bytes.push(128 + ((codePoint >>> 12) & 63));
       bytes.push(128 + ((codePoint >>> 6) & 63));
       bytes.push(128 + (codePoint & 63));
+    } else {
+      // Higher codepoints are not supported in UTF-8 following RFC 3629.
+      throw new jsBytes.Error(
+          'Code point ' + codePoint + ' for character ' +
+          uniString.charAt(i) + ' cannot be converted to UTF-8');
     }
-    // TODO: support higher value unicode chars.
   }
   return bytes;
 };

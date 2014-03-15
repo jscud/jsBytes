@@ -187,17 +187,6 @@
               jsBytes.utf8BytesToString([0xCE, 0xB1]));
           test.assertEqual('Full width z', '\uFF5A',
               jsBytes.utf8BytesToString([0xEF, 0xBD, 0x9A]));
-          
-          /*test.assertArraysEqual('Section symbol', [0xC2, 0xA7],
-              jsBytes.stringToUtf8Bytes('\u00A7'));
-          test.assertArraysEqual('Division symbol', [0xC3, 0xB7],
-              jsBytes.stringToUtf8Bytes('\u00F7'));
-          test.assertArraysEqual('Division symbol', [0xC3, 0xB7],
-              jsBytes.stringToUtf8Bytes('\u00F7'));
-          test.assertArraysEqual('Alpha', [0xCE, 0xB1],
-              jsBytes.stringToUtf8Bytes('\u03B1'));
-          test.assertArraysEqual('Full width z', [0xEF, 0xBD, 0x9A],
-              jsBytes.stringToUtf8Bytes('\uFF5A'));*/
       });
 
       suite.runTests(document.getElementById('results'));
