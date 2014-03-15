@@ -90,6 +90,35 @@
             jsBytes.int32ToBytes(-2147483648, true));
       });
 
+      suite.addTest('testInt16ToLittleEndianBytes', function(test) {
+        test.assertArraysEqual('Check 0', [0,0], jsBytes.int16ToBytes(0));
+        test.assertArraysEqual('Check int 16 max', [255,127],
+            jsBytes.int16ToBytes(32767));
+        test.assertArraysEqual('Check unsigned int max', [255,255],
+            jsBytes.int16ToBytes(65535));
+        test.assertArraysEqual('Check -1', [255,255],
+            jsBytes.int16ToBytes(-1));
+        test.assertArraysEqual('Check -2', [254,255],
+            jsBytes.int16ToBytes(-2));
+        test.assertArraysEqual('Check negative int max', [0,128],
+            jsBytes.int16ToBytes(-32768));
+        test.assertThrows('Check beyond negative int max',
+            function() {jsBytes.int16ToBytes(-32769);});
+        test.assertThrows('Check beyond unsigned int max',
+            function() {jsBytes.int16ToBytes(65536);});
+      });
+
+      suite.addTest('testInt16ToBigEndianBytes', function(test) {
+        test.assertArraysEqual('Check 255', [0,255],
+            jsBytes.int16ToBytes(255, true));
+        test.assertArraysEqual('Check int max', [127,255],
+            jsBytes.int16ToBytes(32767, true));
+        test.assertArraysEqual('Check -2', [255,254],
+            jsBytes.int16ToBytes(-2, true));
+        test.assertArraysEqual('Check negative int max', [128,0],
+            jsBytes.int16ToBytes(-32768, true));
+      });
+
       suite.addTest('testLittleEndianBytesToSignedInt32', function(test) {
           test.assertEqual('Check 0', 0,
               jsBytes.littleEndianBytesToSignedInt32([0, 0, 0, 0]));

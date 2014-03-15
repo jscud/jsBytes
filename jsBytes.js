@@ -83,24 +83,28 @@ jsBytes.hexToBytes = function(hexString) {
 };
 
 /**
- * Produces an array of four bytes to represent the integer value.
- * Default output encodes ints in little endian format. Handles signed
- * as well as unsigned integers.
+ * Produces an array of the specified number of bytes to represent the integer
+ * value. Default output encodes ints in little endian format. Handles signed
+ * as well as unsigned integers. Due to limitations in JavaScript's number
+ * format, x cannot be a true 64 bit integer (8 bytes).
  */
-jsBytes.int32ToBytes = function(x, opt_bigEndian) {
-  if (x != Math.floor(x) || x < -2147483648 || x > 4294967295) {
-    throw new jsBytes.Error(x + ' is not a 32 bit integer');
+jsBytes.intToBytes_ = function(x, numBytes, unsignedMax, opt_bigEndian) {
+  var signedMax = Math.floor(unsignedMax / 2);
+  var negativeMax = (signedMax + 1) * -1;
+  if (x != Math.floor(x) || x < negativeMax || x > unsignedMax) {
+    throw new jsBytes.Error(
+        x + ' is not a ' + (numBytes * 8) + ' bit integer');
   }
   var bytes = [];
   var current;
   // Number type 0 is in the positive int range, 1 is larger than signed int,
   // and 2 is negative int.
-  var numberType = x >= 0 && x <= 2147483647 ? 0 :
-      x > 2147483647 && x <= 4294967295 ? 1 : 2;
+  var numberType = x >= 0 && x <= signedMax ? 0 :
+      x > signedMax && x <= unsignedMax ? 1 : 2;
   if (numberType == 2) {
     x = (x * -1) - 1;
   }
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < numBytes; i++) {
     if (numberType == 2) {
       current = 255 - (x % 256);
     } else {
@@ -120,6 +124,20 @@ jsBytes.int32ToBytes = function(x, opt_bigEndian) {
     }
   }
   return bytes;
+
+}
+
+/**
+ * Produces an array of four bytes to represent the integer value.
+ * Default output encodes ints in little endian format. Handles signed
+ * as well as unsigned integers.
+ */
+jsBytes.int32ToBytes = function(x, opt_bigEndian) {
+  return jsBytes.intToBytes_(x, 4, 4294967295, opt_bigEndian);
+};
+
+jsBytes.int16ToBytes = function(x, opt_bigEndian) {
+  return jsBytes.intToBytes_(x, 2, 65535, opt_bigEndian);
 };
 
 jsBytes.checkBytesToIntInput = function(bytes, numBytes, opt_startIndex) {
