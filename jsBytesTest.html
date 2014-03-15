@@ -176,6 +176,30 @@
               jsBytes.stringToUtf8Bytes('\uFF5A'));
       });
 
+      suite.addTest('testUtf8BytesToString', function(test) {
+          test.assertEqual('Check ASCII text', 'Hi!',
+              jsBytes.utf8BytesToString([72, 105, 33]));
+          test.assertEqual('Section symbol', '\u00A7',
+              jsBytes.utf8BytesToString([0xC2, 0xA7]));
+          test.assertEqual('Division symbol', '\u00F7',
+              jsBytes.utf8BytesToString([0xC3, 0xB7]));
+          test.assertEqual('Alpha', '\u03B1',
+              jsBytes.utf8BytesToString([0xCE, 0xB1]));
+          test.assertEqual('Full width z', '\uFF5A',
+              jsBytes.utf8BytesToString([0xEF, 0xBD, 0x9A]));
+          
+          /*test.assertArraysEqual('Section symbol', [0xC2, 0xA7],
+              jsBytes.stringToUtf8Bytes('\u00A7'));
+          test.assertArraysEqual('Division symbol', [0xC3, 0xB7],
+              jsBytes.stringToUtf8Bytes('\u00F7'));
+          test.assertArraysEqual('Division symbol', [0xC3, 0xB7],
+              jsBytes.stringToUtf8Bytes('\u00F7'));
+          test.assertArraysEqual('Alpha', [0xCE, 0xB1],
+              jsBytes.stringToUtf8Bytes('\u03B1'));
+          test.assertArraysEqual('Full width z', [0xEF, 0xBD, 0x9A],
+              jsBytes.stringToUtf8Bytes('\uFF5A'));*/
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>

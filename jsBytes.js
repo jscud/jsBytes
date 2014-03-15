@@ -200,4 +200,31 @@ jsBytes.stringToUtf8Bytes = function(uniString) {
     // TODO: support higher value unicode chars.
   }
   return bytes;
-}
+};
+
+jsBytes.utf8BytesToString = function(bytes) {
+  var i = 0;
+  var s = '';
+  var currentByte;
+  while (i < bytes.length) {
+    currentByte = bytes[i];
+    // TODO: check for invalid bytes, make sure we are not moving beyond
+    // the length of the array.
+    if (currentByte < 128) {
+      s += String.fromCharCode(currentByte);
+      i++;
+    } else if (currentByte >= 192 && currentByte < 224) {
+      s += String.fromCharCode((((currentByte & 31) << 6) + (bytes[i+1] & 63)));
+      i += 2;
+    } else if (currentByte >= 224 && currentByte < 240) {
+      s += String.fromCharCode((((currentByte & 15) << 12) +
+                                ((bytes[i+1] & 63) << 6) +
+                                (bytes[i+2] & 63)));
+      i += 3;
+    } else {
+      // TODO: support higher value unicode chars
+      i++;
+    }
+  }
+  return s;
+};
