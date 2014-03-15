@@ -187,6 +187,12 @@
               jsBytes.utf8BytesToString([0xCE, 0xB1]));
           test.assertEqual('Full width z', '\uFF5A',
               jsBytes.utf8BytesToString([0xEF, 0xBD, 0x9A]));
+          test.assertThrows('Invalid UTF-8 first character',
+              function() {jsBytes.utf8BytesToString([129, 72, 105]);});
+          test.assertThrows('Too few bytes for UTF-8 string',
+              function() {jsBytes.utf8BytesToString([0xEF, 0xBD]);});
+          test.assertThrows('Invalid UTF-8 byte sequence',
+              function() {jsBytes.utf8BytesToString([0xCE, 192]);});
       });
 
       suite.runTests(document.getElementById('results'));

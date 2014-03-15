@@ -210,25 +210,41 @@ jsBytes.utf8BytesToString = function(bytes) {
   var i = 0;
   var s = '';
   var currentByte;
+  var bytesToProcess = 0;
+  var charCode;
   while (i < bytes.length) {
     currentByte = bytes[i];
-    // TODO: check for invalid bytes, make sure we are not moving beyond
-    // the length of the array.
     if (currentByte < 128) {
-      s += String.fromCharCode(currentByte);
-      i++;
+      charCode = currentByte;
     } else if (currentByte >= 192 && currentByte < 224) {
-      s += String.fromCharCode((((currentByte & 31) << 6) + (bytes[i+1] & 63)));
-      i += 2;
+      charCode = (currentByte & 31) << 6;
+      bytesToProcess = 1;
     } else if (currentByte >= 224 && currentByte < 240) {
-      s += String.fromCharCode((((currentByte & 15) << 12) +
-                                ((bytes[i+1] & 63) << 6) +
-                                (bytes[i+2] & 63)));
-      i += 3;
+      charCode = (currentByte & 15) << 12;
+      bytesToProcess = 2;
+    } else if (currentByte >= 240 && currentByte < 248) {
+      charCode = (currentByte & 7) << 18;
+      bytesToProcess = 3;
     } else {
-      // TODO: support higher value unicode chars
+      throw new jsBytes.Error(
+          'First byte of UTF-8 string outside of expected range' + currentByte);
+    } 
+    i++;
+
+    while (bytesToProcess > 0) {
+      if (i < bytes.length) {
+        if (bytes[i] > 191) {
+          throw new jsBytes.Error('Invalid UTF-8 byte at position ' + i);
+        }
+        charCode += (bytes[i] & 63) << ((bytesToProcess - 1) * 6); 
+      } else {
+        throw new jsBytes.Error('Fewer than expected bytes for UTF-8 string.');
+      }
+      bytesToProcess--;
       i++;
     }
+
+    s += String.fromCharCode(charCode);
   }
   return s;
 };
