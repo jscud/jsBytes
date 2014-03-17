@@ -173,7 +173,6 @@ jsBytes.littleEndianBytesToUnsignedInt32 = function(bytes, opt_startIndex) {
 
 jsBytes.bigEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
   var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
-  jsBytes.checkBytesToIntInput(bytes, 4, index);
   value = bytes[index + 3];
   value += bytes[index + 2] << 8;
   value += bytes[index + 1] << 16;
@@ -184,8 +183,43 @@ jsBytes.bigEndianBytesToSignedInt32 = function(bytes, opt_startIndex) {
 jsBytes.bigEndianBytesToUnsignedInt32 = function(bytes, opt_startIndex) {
   var index = jsBytes.checkBytesToIntInput(bytes, 4, opt_startIndex);
   var value = 0;
-  jsBytes.checkBytesToIntInput(bytes, 4, index);
   for (var i = index + 3, accum = 1; i >= index; i--, accum *= 256) {
+    value += bytes[i] * accum;
+  }
+  return value;
+};
+
+jsBytes.littleEndianBytesToSignedInt16 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 2, opt_startIndex);
+  var isNegative = bytes[index + 1] > 127;
+  var negativeShift = isNegative ? 255 : 0;
+  value = bytes[index] - negativeShift - (isNegative ? 1 : 0);
+  value += (bytes[index + 1] - negativeShift) << 8;
+  return value;
+};
+
+jsBytes.littleEndianBytesToUnsignedInt16 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 2, opt_startIndex);
+  var value = 0;
+  for (var i = index, accum = 1; i < index + 2; i++, accum *= 256) {
+    value += bytes[i] * accum;
+  }
+  return value;
+};
+
+jsBytes.bigEndianBytesToSignedInt16 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 2, opt_startIndex);
+  var isNegative = bytes[index] > 127;
+  var negativeShift = isNegative ? 255 : 0;
+  value = bytes[index + 1] - negativeShift - (isNegative ? 1 : 0);
+  value += (bytes[index] - negativeShift) << 8;
+  return value;
+};
+
+jsBytes.bigEndianBytesToUnsignedInt16 = function(bytes, opt_startIndex) {
+  var index = jsBytes.checkBytesToIntInput(bytes, 2, opt_startIndex);
+  var value = 0;
+  for (var i = index + 1, accum = 1; i >= index; i--, accum *= 256) {
     value += bytes[i] * accum;
   }
   return value;
