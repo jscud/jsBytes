@@ -137,8 +137,7 @@ jsBytes.intToBytes_ = function(x, numBytes, unsignedMax, opt_bigEndian) {
     }
   }
   return bytes;
-
-}
+};
 
 /**
  * Produces an array of four bytes to represent the integer value.

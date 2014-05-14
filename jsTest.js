@@ -74,6 +74,18 @@ jsTest.TestExecution.prototype.assertTrue = function(message, condition) {
 };
 
 /**
+ * Check that a condition is false as expected.
+ * @param {string} message Description of the expectation to show to the user
+ *     if the condition is true instead of false.
+ * @param {Object} condition Report test case failure if condition is true.
+ */
+jsTest.TestExecution.prototype.assertFalse = function(message, condition) {
+  if (condition) {
+    this.recordFailure_(message);
+  }
+};
+
+/**
  * Check that the two items are equivalent.
  * @param {string} message Description of the expectation to show to the user
  *     if the items are not equal.
