@@ -298,6 +298,52 @@ limitations under the License.
               function() {jsBytes.utf8BytesToString([0xCE, 192]);});
       });
 
+      suite.addTest('testLittleEndianBytesToDouble', function(test) {
+          test.assertEqual('Check 1', 1, jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('000000000000F03F')));
+          test.assertEqual('Check 1.0000000000000002', 1.0000000000000002,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('010000000000F03F')));
+          test.assertEqual('Check 1.0000000000000004', 1.0000000000000004,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('020000000000F03F')));
+          test.assertEqual('Check 2', 2, jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('0000000000000040')));
+          test.assertEqual('Check -2', -2, jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('00000000000000C0')));
+          test.assertEqual('Check smallest normal positive double',
+              2.2250738585072014e-308, jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('0000000000001000')));
+          test.assertEqual('Check largest possible double',
+              1.7976931348623157e+308, jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('FFFFFFFFFFFFEF7F')));
+          test.assertEqual('Check 1/3', 0.3333333333333333,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('555555555555D53F')));
+          // Subnormals.
+          test.assertEqual('Check 2 to the −1074', 5e-324,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('0100000000000000')));
+          test.assertEqual('Check 2 to the −1022 minus 2 to the −1074',
+              2.225073858507201e-308, jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('FFFFFFFFFFFF0F000')));
+          // Zeroes.
+          test.assertEqual('Check 0', 0, jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('0000000000000000')));
+          test.assertEqual('Check -0', -0, jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('0000000000000080')));
+          // Infinities.
+          test.assertEqual('Check infinity', Infinity,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('000000000000F07F')));
+          test.assertEqual('Check -infinity', -Infinity,
+              jsBytes.littleEndianBytesToDouble(
+                  jsBytes.hexToBytes('000000000000F0FF')));
+          // Not a number.
+          test.assertTrue('Check NaN', isNaN(jsBytes.littleEndianBytesToDouble(
+              jsBytes.hexToBytes('010000000000F07F'))));
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>

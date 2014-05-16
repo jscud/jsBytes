@@ -89,8 +89,8 @@ jsBytes.HEX_TO_HALF_BYTE_MAP = {
 jsBytes.hexToBytes = function(hexString) {
   var bytes = [];
   for (var i = 0; i < hexString.length - 1; i += 2) {
-    bytes.push(jsBytes.HEX_TO_HALF_BYTE_MAP[hexString[i+1]] + 
-               (jsBytes.HEX_TO_HALF_BYTE_MAP[hexString[i]] << 4));
+    bytes.push(jsBytes.HEX_TO_HALF_BYTE_MAP[hexString.charAt(i+1)] + 
+               (jsBytes.HEX_TO_HALF_BYTE_MAP[hexString.charAt(i)] << 4));
   }
   return bytes;
 };
@@ -311,4 +311,61 @@ jsBytes.utf8BytesToString = function(bytes) {
     s += String.fromCharCode(charCode);
   }
   return s;
+};
+
+jsBytes.EXPONENT_BIAS = 1023;
+
+jsBytes.FRACTION_DIVISOR = 4503599627370496;
+
+// The to and from double functions were inspired by the following blog post
+// http://goo.gl/s9iFe5 (Javascript and IEEE754 Redux).
+jsBytes.littleEndianBytesToDouble = function(bytes, opt_startIndex) {
+  var startIndex = opt_startIndex || 0;
+  if (startIndex < 0) {
+    throw new jsBytes.Error('Start index should not be negative');
+  }
+  if (bytes.length < startIndex + 8) {
+    throw new jsBytes.Error('Need at least 8 bytes to convert to a double ' +
+                            'precision floating point number');
+  }
+
+  // Layout for floating point data:  sign bit = s, exponent = e, fraction = f
+  // byte 8     7          6          5      4      3      2      1
+  // seee eeee  eeee ffff  ffff ffff  f...f  f...f  f...f  f...f  ffff ffff
+  // 1 bit for sign, 11 for exponent, and 52 for the fraction.
+  var signMultiplier = bytes[startIndex + 7] >= 128 ? -1 : 1;
+
+  var exponent = ((bytes[startIndex + 7] & 0x7F) << 4) +
+                 ((bytes[startIndex + 6] & 0xF0) >> 4);
+
+  // To build the fraction, we need to process the bits one at a time. We
+  // look at bits from the lower 7 bytes (the 8th has the sign and part of
+  // the exponent).
+  var bitStrings = [];
+  var current;
+  for (var i = startIndex; i <= startIndex + 6; i++) {
+    current = bytes[i];
+    for (var j = 0; j < 8; j++) {
+      bitStrings.unshift('' + current & 0x01);
+      current = current >> 1;
+    }
+  }
+  // Skip over the first 4 bits which are the end of the exponent. We use
+  // parseInt to obtain values that are larger than can fit in 32 bits.
+  var fraction = parseInt(bitStrings.join('').substring(4), 2);
+
+  if (exponent == 0x7FF) {
+    // Special value for infinity and not-a-number.
+    return fraction != 0 ? NaN : signMultiplier * Infinity;
+  } else if (exponent == 0) {
+    // Subnormal or 0.
+    if (fraction == 0) {
+      return signMultiplier * 0;
+    } else {
+      return signMultiplier * Math.pow(2, -(jsBytes.EXPONENT_BIAS - 1)) *
+          (fraction / jsBytes.FRACTION_DIVISOR);
+    }
+  }
+  return signMultiplier * Math.pow(2, exponent - jsBytes.EXPONENT_BIAS) *
+      (1 + fraction / jsBytes.FRACTION_DIVISOR);
 };
