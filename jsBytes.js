@@ -317,6 +317,19 @@ jsBytes.EXPONENT_BIAS = 1023;
 
 jsBytes.FRACTION_DIVISOR = 4503599627370496;
 
+// TODO: add support for big endian output (opt_bigEndian).
+jsBytes.doubleToBytes = function(x) {
+  if (x == 0) {
+    return [0, 0, 0, 0, 0, 0, 0, 0];
+  } else if (x == Infinity) {
+    return [0, 0, 0, 0, 0, 0, 240, 127];
+  } else if (x == -Infinity) {
+    return [0, 0, 0, 0, 0, 0, 240, 255];
+  } else if (isNaN(x)) {
+    return [1, 0, 0, 0, 0, 0, 240, 127];
+  }
+};
+
 // The to and from double functions were inspired by the following blog post
 // http://goo.gl/s9iFe5 (Javascript and IEEE754 Redux).
 jsBytes.littleEndianBytesToDouble = function(bytes, opt_startIndex) {

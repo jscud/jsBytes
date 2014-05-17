@@ -344,6 +344,20 @@ limitations under the License.
               jsBytes.hexToBytes('010000000000F07F'))));
       });
 
+      suite.addTest('testDoubleToLittleEndianBytes', function(test) {
+        test.assertArraysEqual('Check 0', [0, 0, 0, 0, 0, 0, 0, 0],
+            jsBytes.doubleToBytes(0));
+        // Since -0 == 0 we end up generating the bytes for 0.
+        test.assertArraysEqual('Check -0', [0, 0, 0, 0, 0, 0, 0, 0],
+            jsBytes.doubleToBytes(-0));
+        test.assertArraysEqual('Check Infinity', [0, 0, 0, 0, 0, 0, 240, 127],
+            jsBytes.doubleToBytes(Infinity));
+        test.assertArraysEqual('Check -Infinity', [0, 0, 0, 0, 0, 0, 240, 255],
+            jsBytes.doubleToBytes(-Infinity));
+        test.assertArraysEqual('Check NaN', [1, 0, 0, 0, 0, 0, 240, 127],
+            jsBytes.doubleToBytes(NaN));
+      });
+
       suite.runTests(document.getElementById('results'));
     </script>
   </body>
