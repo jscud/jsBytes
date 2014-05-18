@@ -326,7 +326,7 @@ limitations under the License.
                   jsBytes.hexToBytes('0100000000000000')));
           test.assertEqual('Check 2 to the −1022 minus 2 to the −1074',
               2.225073858507201e-308, jsBytes.littleEndianBytesToDouble(
-                  jsBytes.hexToBytes('FFFFFFFFFFFF0F000')));
+                  jsBytes.hexToBytes('FFFFFFFFFFFF0F00')));
           // Zeroes.
           test.assertEqual('Check 0', 0, jsBytes.littleEndianBytesToDouble(
               jsBytes.hexToBytes('0000000000000000')));
@@ -356,6 +356,30 @@ limitations under the License.
             jsBytes.doubleToBytes(-Infinity));
         test.assertArraysEqual('Check NaN', [1, 0, 0, 0, 0, 0, 240, 127],
             jsBytes.doubleToBytes(NaN));
+
+        // Reverse the checks in testLittleEndianBytesToDouble.
+        test.assertEqual('Check 1', '000000000000F03F', jsBytes.bytesToHex(
+            jsBytes.doubleToBytes(1)));
+        test.assertEqual('Check 1.0000000000000002', '010000000000F03F',
+            jsBytes.bytesToHex(jsBytes.doubleToBytes(1.0000000000000002)));
+        test.assertEqual('Check 1.0000000000000004', '020000000000F03F',
+            jsBytes.bytesToHex(jsBytes.doubleToBytes(1.0000000000000004)));
+        test.assertEqual('Check 2', '0000000000000040', jsBytes.bytesToHex(
+            jsBytes.doubleToBytes(2)));
+        test.assertEqual('Check -2', '00000000000000C0', jsBytes.bytesToHex(
+            jsBytes.doubleToBytes(-2)));
+        test.assertEqual('Check smallest normal positive double',
+            '0000000000001000', jsBytes.bytesToHex(jsBytes.doubleToBytes(
+                2.2250738585072014e-308)));
+        test.assertEqual('Check largest possible double', 'FFFFFFFFFFFFEF7F',
+            jsBytes.bytesToHex(jsBytes.doubleToBytes(1.7976931348623157e+308)));
+        test.assertEqual('Check 1/3', '555555555555D53F', jsBytes.bytesToHex(
+            jsBytes.doubleToBytes(0.3333333333333333)));
+        test.assertEqual('Check 2 to the −1074', '0100000000000000',
+            jsBytes.bytesToHex(jsBytes.doubleToBytes(5e-324)));
+        test.assertEqual('Check 2 to the −1022 minus 2 to the −1074',
+            'FFFFFFFFFFFF0F00', jsBytes.bytesToHex(jsBytes.doubleToBytes(
+            2.225073858507201e-308)));
       });
 
       suite.runTests(document.getElementById('results'));

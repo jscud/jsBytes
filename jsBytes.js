@@ -317,6 +317,8 @@ jsBytes.EXPONENT_BIAS = 1023;
 
 jsBytes.FRACTION_DIVISOR = 4503599627370496;
 
+// The to and from double functions were inspired by the following blog post
+// http://goo.gl/s9iFe5 (Javascript and IEEE754 Redux).
 // TODO: add support for big endian output (opt_bigEndian).
 jsBytes.doubleToBytes = function(x) {
   if (x == 0) {
@@ -328,10 +330,46 @@ jsBytes.doubleToBytes = function(x) {
   } else if (isNaN(x)) {
     return [1, 0, 0, 0, 0, 0, 240, 127];
   }
+
+  var bytes = [];
+  var isNegative = x < 0;
+  if (isNegative) {
+    x = -1 * x;
+  }
+  
+  var exponent;
+  var fraction;
+  if (x >= Math.pow(2, 1 - jsBytes.EXPONENT_BIAS)) {
+    exponent =
+        Math.min(Math.floor(Math.log(x) / Math.LN2), jsBytes.EXPONENT_BIAS) +
+        jsBytes.EXPONENT_BIAS;
+    fraction =
+        x * Math.pow(2, 52 - (exponent - jsBytes.EXPONENT_BIAS)) -
+        Math.pow(2, 52);
+  } else {
+    exponent = 0;
+    fraction = x / Math.pow(2, 1 - jsBytes.EXPONENT_BIAS - 52);
+  }
+
+  var i;
+  var bits = [];
+  for (i = 0; i < 52; i++) {
+    bits.unshift(fraction & 1);
+    fraction = Math.floor(fraction / 2);
+  }
+  for (i = 0; i < 11; i++) {
+    bits.unshift(exponent & 1);
+    exponent = exponent >> 1;
+  }
+  bits.unshift(isNegative ? 1 : 0);
+  var allBits = bits.join('');
+
+  for (i = 0; i < 8; i++) {
+    bytes.unshift(parseInt(allBits.substr(i * 8, 8), 2));
+  }
+  return bytes;
 };
 
-// The to and from double functions were inspired by the following blog post
-// http://goo.gl/s9iFe5 (Javascript and IEEE754 Redux).
 jsBytes.littleEndianBytesToDouble = function(bytes, opt_startIndex) {
   var startIndex = opt_startIndex || 0;
   if (startIndex < 0) {
