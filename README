@@ -1,3 +1,8 @@
 === jsBytes ===
 
 A collection of handy helper functions for working with arrays of bytes in JavaScript.
+
+--- Example Usage ---
+
+var bytes = jsBytes.int32ToBytes(-2);
+var negativeTwo = jsBytes.littleEndianBytesToSignedInt32(bytes);
